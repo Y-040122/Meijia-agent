@@ -1,0 +1,30 @@
+# API 密钥，绝对不要提交到 Git
+.env
+.env.*
+!.env.example
+
+# Python 缓存
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# 虚拟环境
+venv/
+.venv/
+env/
+
+# macOS
+.DS_Store
+
+# 备份目录
+backup_final/
+
+# 用户上传的图片（隐私）
+uploads/
+
+# 数据真相文件（评测用，不公开）
+mock_data_truth.json
+store_dna.json
+ai_insights.json
+content_pool.json
