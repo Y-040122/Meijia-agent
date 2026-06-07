@@ -17,6 +17,16 @@ from nail_agent import SYSTEM_PROMPT as _RAW
 
 load_dotenv()
 
+
+def get_api_key(key_name):
+    """优先从 st.secrets 读 API Key，失败回退到 .env"""
+    try:
+        return st.secrets[key_name]
+    except (KeyError, FileNotFoundError, Exception):
+        load_dotenv()
+        return os.getenv(key_name)
+
+
 # ══════════════════════════════════════════════════════════════════════════════
 # ▌色彩系统
 # ══════════════════════════════════════════════════════════════════════════════
@@ -256,7 +266,7 @@ for _k, _v in [
         st.session_state[_k] = _v
 
 # ─── API 客户端 ─────────────────────────────────────────────────────────────────
-_key = os.getenv("ANTHROPIC_API_KEY", "")
+_key = get_api_key("ANTHROPIC_API_KEY") or ""
 if not _key:
     st.error("❌ 未找到 ANTHROPIC_API_KEY，请在 .env 文件中配置。")
     st.stop()

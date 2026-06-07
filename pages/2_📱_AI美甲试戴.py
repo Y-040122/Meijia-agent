@@ -17,6 +17,16 @@ from dotenv import load_dotenv
 PROJECT_ROOT = Path(__file__).parent.parent
 load_dotenv(PROJECT_ROOT / ".env")
 
+
+def get_api_key(key_name):
+    """优先从 st.secrets 读 API Key，失败回退到 .env"""
+    try:
+        return st.secrets[key_name]
+    except (KeyError, FileNotFoundError, Exception):
+        load_dotenv()
+        return os.getenv(key_name)
+
+
 # ── 页面配置 ─────────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="AI 美甲试戴 · 甲心助手",
@@ -102,14 +112,14 @@ def generate_tryon_image(hand_image_pil: Image.Image, style_image_pil: Image.Ima
     """
     import anthropic
 
-    os.environ["REPLICATE_API_TOKEN"] = os.getenv("REPLICATE_API_TOKEN", "")
+    os.environ["REPLICATE_API_TOKEN"] = get_api_key("REPLICATE_API_TOKEN") or ""
 
     # ── Step A: Claude Vision 描述款式图 ──────────────────────────────────────
     buf = io.BytesIO()
     style_image_pil.save(buf, format="PNG")
     style_b64 = base64.b64encode(buf.getvalue()).decode("utf-8")
 
-    anthropic_client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+    anthropic_client = anthropic.Anthropic(api_key=get_api_key("ANTHROPIC_API_KEY"))
     desc_response = anthropic_client.messages.create(
         model="claude-sonnet-4-5",
         max_tokens=500,
@@ -230,7 +240,7 @@ def share_to_content_pool():
     with open(img_path, "rb") as f:
         img_b64 = base64.standard_b64encode(f.read()).decode("utf-8")
 
-    anthropic_client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+    anthropic_client = anthropic.Anthropic(api_key=get_api_key("ANTHROPIC_API_KEY"))
     vision_resp = anthropic_client.messages.create(
         model="claude-sonnet-4-5",
         max_tokens=1000,
